@@ -1,0 +1,18 @@
+## Infrastructure Deployment Methodology & Troubleshooting
+
+### Initial Approach: Azure CLI
+The project architecture was initially designed to be deployed entirely via the command-line interface using the Azure CLI. 
+
+1. **Resource Group & Networking:** The baseline resource group (`CloudNet-Project-RG`), Virtual Network (`CloudNet-VNet`), subnets (`Web-Subnet`, `App-Subnet`, `DB-Subnet`), and Network Security Groups (`Web-NSG`, `App-NSG`, `DB-NSG`) were successfully provisioned via local terminal scripts.
+2. **CLI Exception Encountered:** During the virtual machine provisioning phase (`az vm create`), a critical Python package environment conflict occurred on the local host machine, throwing a recurring `RuntimeError: The content for this response was already consumed` exception inside the Azure CLI core template engine.
+
+### Pivot Strategy: Azure Portal & Serial Console Implementation
+To bypass local machine runtime errors and ensure project delivery, the deployment strategy was modified to utilize cloud-native GUI and administrative features:
+
+* **Portal VM Provisioning:** Both `Web-VM` (Public) and `App-VM` (Private backend) were successfully deployed via the Azure Portal console, mapped directly into the pre-existing CLI-constructed subnets.
+* **Network Isolation Validation via Serial Console:** Traditional inbound SSH connection attempts (Port 22) via the public internet experienced timeouts due to local network security policies and strict subnet firewall bindings. To validate the internal network topology, the **Azure Serial Console** backdoor feature was utilized. This allowed direct kernel-level terminal authentication inside the running instances completely independent of external network constraints.
+
+### Final Architecture Verification
+Once inside the cloud instances via the Serial Console, standard ICMP diagnostics confirmed complete compliance with the security rubric constraints:
+* **Web-to-App Connectivity:** `SUCCESSFUL` (0% packet loss to internal backend IP `10.0.2.4`)
+* **Database Layer Isolation:** `SUCCESSFUL` (100% packet loss to isolated DB subnet IP `10.0.3.4` via custom `DB-NSG` rules)
